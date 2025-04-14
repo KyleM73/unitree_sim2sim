@@ -1,0 +1,14 @@
+services:
+  unitree_sim2sim:
+    build: .
+    environment:
+      # - DISPLAY=host.docker.internal:0
+      volumes:
+      - ./external:/root
+      - ~/.Xauthority:/root/.Xauthority:rw
+      # - ./external/unitree_mujoco:/root/unitree_mujoco
+      # - ./external/unitree_sdk2:/root/unitree_sdk2
+    network_mode: bridge
+    # tty: true
+    # stdin_open: true
+

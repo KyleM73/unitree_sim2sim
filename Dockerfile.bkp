@@ -1,0 +1,78 @@
+FROM ubuntu:20.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV USER=root
+ENV CYCLONEDDS_HOME="/root/cyclonedds/install"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    cmake \
+    git \
+    vim \
+    curl \
+    python3 \
+    python3-pip \
+    python3-dev \
+    libgl1-mesa-glx \
+    libgl1-mesa-dri \
+    libglu1-mesa \
+    libosmesa6-dev \
+    libglfw3-dev \
+    libglew-dev \
+    libgl1-mesa-dev \
+    libxrandr-dev \
+    libxinerama-dev \
+    libxcursor-dev \
+    libxi-dev \
+    libxmu-dev \
+    libxrender1 \
+    libxext6 \
+    libx11-6 \
+    libglib2.0-0 \
+    libeigen3-dev \
+    libyaml-cpp-dev \
+    libsm6 \
+    libxext6 \
+    patchelf \
+    ffmpeg \
+    x11-utils \
+    x11-apps \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# --- Python & Web API dependencies ---
+RUN pip3 install --no-cache-dir fastapi[all] uvicorn websockets opencv-python numpy mujoco pygame
+
+# --- Copy simulation source code ---
+COPY ./external/unitree_sdk2 /root/unitree_sdk2
+COPY ./external/unitree_sdk2_python /root/unitree_sdk2_python
+COPY ./external/unitree_mujoco /root/unitree_mujoco
+COPY ./external/mujoco /root/mujoco
+COPY ./external/cyclonedds /root/cyclonedds
+# COPY app /app  # FastAPI app code
+
+# --- Build MuJoCo C++ simulation ---
+WORKDIR /root/unitree_sdk2
+RUN mkdir -p build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=/opt/unitree_robotics && make -j$(nproc) install
+
+
+WORKDIR /root/cyclonedds
+RUN mkdir /root/cyclonedds/build && mkdir /root/cyclonedds/install \
+    && cd /root/cyclonedds/build \
+    && cmake .. -DCMAKE_INSTALL_PREFIX=/root/cyclonedds/install \
+    && cmake --build . --target install
+WORKDIR /root/unitree_sdk2_python
+RUN pip3 install -e .
+
+WORKDIR /root/mujoco
+RUN mkdir -p build && cd build && cmake .. && make -j$(nproc) && make install
+
+WORKDIR /root/unitree_mujoco/simulate
+RUN mkdir -p build && cd build && cmake .. && make -j$(nproc)
+
+# --- Working dir for WebSocket server ---
+WORKDIR /app
+
+# --- Run the FastAPI server (can interface with sim) ---
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+

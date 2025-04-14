@@ -1,0 +1,28 @@
+location: external
+sources:
+    # unitree_mujoco fork
+    - repo: git@github.com:KyleM73/unitree_mujoco.git
+      name: unitree_mujoco
+      rev: hcrl
+      type: git
+    # unitree sdk2 
+    - repo: git@github.com:unitreerobotics/unitree_sdk2.git
+      name: unitree_sdk2
+      rev: main
+      type: git
+    - repo: git@github.com:unitreerobotics/unitree_sdk2_python.git
+      name: unitree_sdk2_python
+      rev: master
+      type: git
+    # mujoco
+    - repo: git@github.com:google-deepmind/mujoco.git
+      name: mujoco
+      rev: 3.2.7
+      type: git
+    # cyclonedds
+    - repo: git@github.com:eclipse-cyclonedds/cyclonedds.git
+      name: cyclonedds
+      rev: releases/0.10.x
+      type: git
+default_group: ''
+groups:
