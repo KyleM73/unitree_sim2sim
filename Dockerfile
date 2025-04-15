@@ -32,7 +32,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libyaml-cpp-dev \
     libsm6 \
     libxext6 \
-    xauth \
+    x11-utils \
+    wmctrl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY ./external/unitree_sdk2 /root/unitree_sdk2
@@ -53,15 +54,16 @@ WORKDIR /root/mujoco
 RUN mkdir -p build && \
     cd build && cmake .. && make -j$(nproc) && make install
 
-COPY ./external/unitree_mujoco /root/unitree_mujoco
-WORKDIR /root/unitree_mujoco/simulate
-RUN mkdir -p build && cd build && cmake .. && make -j$(nproc)
-
 COPY ./external/unitree_sdk2_python /root/unitree_sdk2_python
 WORKDIR /root/unitree_sdk2_python
 # RUN pip3 install -e /root/unitree_sdk2_python
 RUN python3 -m pip install .
+COPY ./external/unitree_sdk2_python/unitree_sdk2py/utils/lib/crc_amd64.so /usr/local/lib/python3.8/dist-packages/unitree_sdk2py/utils/lib/
 RUN pip3 install mujoco pygame
+
+COPY ./external/unitree_mujoco /root/unitree_mujoco
+WORKDIR /root/unitree_mujoco/simulate
+RUN mkdir -p build && cd build && cmake .. && make -j$(nproc)
 
 COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

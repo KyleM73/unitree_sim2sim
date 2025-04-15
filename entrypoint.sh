@@ -13,13 +13,35 @@ case "$SIMULATOR" in
   cpp)
     echo "Launching C++ simulator..."
     cd /root/unitree_mujoco/simulate/build
-    exec ./unitree_mujoco
+    ./unitree_mujoco &
+    SIM_PID=$!
+    echo "Simulator initializing..."
+    sleep 2
+    wmctrl -r ":ACTIVE:" -b add,maximized_vert,maximized_horz
+    sleep 3
+    echo "Start controller"
+    ./test &
+    echo "Press Ctrl+C to exit"
+    wait $SIM_PID
+    echo "Simulator exited. Shutting down container..."
+    exit 0
     ;;
 
   python)
     echo "Launching Python simulator..."
     cd /root/unitree_mujoco/simulate_python
-    exec python3 ./unitree_mujoco.py
+    python3 ./unitree_mujoco.py &
+    SIM_PID=$!
+    echo "Simulator initializing..."
+    sleep 2
+    wmctrl -r ":ACTIVE:" -b add,maximized_vert,maximized_horz
+    sleep 3
+    echo "Start controller"
+    echo "Press Ctrl+C to exit"
+    python3 ./test/test_unitree_sdk2.py &
+    wait $SIM_PID
+    echo "Simulator exited. Shutting down container..."
+    exit 0
     ;;
 
   bash|shell)
