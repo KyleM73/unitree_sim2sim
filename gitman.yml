@@ -10,7 +10,8 @@ sources:
       name: unitree_sdk2
       rev: main
       type: git
-    - repo: git@github.com:unitreerobotics/unitree_sdk2_python.git
+    # - repo: git@github.com:unitreerobotics/unitree_sdk2_python.git
+    - repo: git@github.com:lnotspotl/unitree_sdk2_python.git # fix pip wheels
       name: unitree_sdk2_python
       rev: master
       type: git

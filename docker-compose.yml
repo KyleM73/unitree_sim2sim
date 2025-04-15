@@ -1,14 +1,25 @@
 services:
-  unitree_sim2sim:
-    build: .
+  unitree-sim2sim:
+    build: 
+        context: .
+        dockerfile: Dockerfile
+    container_name: unitree-sim2sim
     environment:
-      # - DISPLAY=host.docker.internal:0
-      volumes:
-      - ./external:/root
-      - ~/.Xauthority:/root/.Xauthority:rw
-      # - ./external/unitree_mujoco:/root/unitree_mujoco
-      # - ./external/unitree_sdk2:/root/unitree_sdk2
-    network_mode: bridge
-    # tty: true
-    # stdin_open: true
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+      - LIBGL_ALWAYS_SOFTWARE=1
+    volumes: 
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw 
+      - ./external/unitree_mujoco/simulate_python:/root/unitree_mujoco/simulate_python:rw
+    network_mode: "host" 
+    devices: 
+      - "/dev/dri" # Hardware-accelerated OpenGL
+    privileged: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+    runtime: nvidia
+
 
